@@ -12,6 +12,7 @@ from .problem import Problem
 
 def lint(parse_tree: Tree, config: MappingProxyType) -> List[Problem]:
     disable = config["disable"]
+    
     rule_name_tokens = _gather_rule_name_tokens(
         parse_tree,
         [
@@ -34,9 +35,27 @@ def lint(parse_tree: Tree, config: MappingProxyType) -> List[Problem]:
             partial(
                 _generic_name_check,
                 config["function-name"],
-                rule_name_tokens["func_def"],
+                _get_functions(
+                    parse_tree,
+                    False,
+                    ["func_def"],
+                )["func_def"],
                 "function-name",
                 'Function name "{}" is not valid',
+            ),
+        ),
+        (
+            "async-function-name",
+            partial(
+                _generic_name_check,
+                config["async-function-name"],
+                _get_functions(
+                    parse_tree,
+                    True,
+                    ["func_def"],
+                )["func_def"],
+                "async-function-name",
+                'Async Function name "{}" is not valid',
             ),
         ),
         (
@@ -264,3 +283,28 @@ def _has_call_expr_name_in(tree: Tree, legal_names: List[str]) -> bool:
                 name = name_token.value
                 return name in legal_names
     return False
+
+def _has_await(parse_tree: Tree) -> bool:
+    for _ in parse_tree.find_data("await_expr"):
+        return True
+    return False
+
+def _get_functions(
+    parse_tree: Tree, only_async_funcs: bool, rules
+) -> Dict[str, List[str]]:
+    name_tokens_per_rule = {rule: [] for rule in rules}  # type: Dict[str, List[str]]
+    for node in parse_tree.iter_subtrees():
+        if isinstance(node, Tree) and node.data in rules:
+            is_async = _has_await(node)
+
+            if only_async_funcs != is_async:
+                continue
+
+            rule_name = node.data
+            name_token = find_name_token_among_children(node)
+            if name_token is None:
+                name_token = find_name_token_among_children(node.children[0])
+            assert name_token is not None
+
+            name_tokens_per_rule[rule_name].append(name_token)
+    return name_tokens_per_rule

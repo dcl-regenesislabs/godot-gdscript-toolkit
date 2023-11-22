@@ -2,7 +2,6 @@ import pytest
 
 from .common import simple_ok_check, simple_nok_check
 
-
 # fmt: off
 @pytest.mark.parametrize('code', [
 """
@@ -31,7 +30,7 @@ func foo():
     '''docstr'''
 """,
 """
-func foo():
+func async_foo():
     await get_tree().create_timer(2.0).timeout
 """,
 """

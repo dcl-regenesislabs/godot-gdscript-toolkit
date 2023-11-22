@@ -43,6 +43,35 @@ func SomeName():
 def test_function_name_nok(code):
     simple_nok_check(code, 'function-name')
 
+@pytest.mark.parametrize('code', [
+"""
+func async_some_button():
+    await 0
+""",
+"""
+func _async_a_name():
+    await 0
+
+func test_simple_func():
+    pass
+""",
+])
+def test_async_function_name_ok(code):
+    simple_ok_check(code)
+
+@pytest.mark.parametrize('code', [
+"""
+func _some_button():
+    await 0
+""",
+"""
+func asynca_name():
+    await 0
+""",
+])
+def test_function_name_nok(code):
+    simple_nok_check(code, 'async-function-name')
+
 
 @pytest.mark.parametrize('code', [
 """

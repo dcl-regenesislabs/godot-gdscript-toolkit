@@ -29,6 +29,9 @@ DEFAULT_CONFIG = MappingProxyType(
         "function-name": r"(_on_{}(_[a-z0-9]+)*|{})".format(
             PASCAL_CASE, PRIVATE_SNAKE_CASE
         ),
+        "async-function-name": r"(_async_{}|async_{})".format(
+            SNAKE_CASE, SNAKE_CASE
+        ),
         "class-name": PASCAL_CASE,
         "sub-class-name": r"_?{}".format(PASCAL_CASE),
         "signal-name": SNAKE_CASE,

@@ -343,6 +343,17 @@ func f(card: Control, flag: bool):
     assert _names(code) == [(AWAIT_RULE, 7)]
 
 
+def test_get_set_tokens_in_chains_do_not_crash():
+    code = """
+func f(data: Dictionary):
+    await g()
+    foo().get("x")
+    data.get("y").set("z", 1)
+    bar().set(1)
+"""
+    assert _names(code) == []
+
+
 def test_loop_variable_after_await_in_body():
     code = """
 func f(cards: Array):

@@ -671,7 +671,8 @@ class _FunctionChecker:
         self._check_arguments(node.children[1:], node)
         # `emitter.signal.connect(func(): emitter.x())`: the emitter is alive
         # while its own signal is being delivered.
-        emitter = receiver if names[-1] == "connect" and not direct else None
+        is_connect = _last_attr(getattr_node) == "connect"
+        emitter = receiver if is_connect and not direct else None
         for child in node.children:
             if (
                 emitter is not None

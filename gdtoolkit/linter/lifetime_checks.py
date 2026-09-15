@@ -6,33 +6,40 @@ a use-after-free and the process dies with SIGSEGV (the debug template turns
 the same access into a logged error). Property get/set is validated in every
 build, so only the call-like shapes are dangerous.
 
-Two things make a reference stale without the code looking wrong:
+`await` is where references go stale: the function hands control back to the
+engine, and whatever it was about to touch may be gone when it resumes. The
+engine protects `self` - a coroutine whose instance was freed is never
+resumed, and a lambda that captures `self` is skipped once `self` is gone -
+but nothing else: arguments, members, captured locals.
 
-* `await` hands control back to the engine; whatever the function was about
-  to touch may be gone when it resumes. The engine protects `self` (a
-  coroutine whose instance was freed is never resumed) but nothing else -
-  arguments, members, captured locals.
-* `if node:` / `node == null` do not detect a freed instance: the reference is
-  non-null, so the test passes and the next line crashes.
-  `is_instance_valid()` resolves the object id instead of the pointer.
+The rules therefore detect a *non-self node reference carried across an
+await*. The fix is structural, in this order: make the async work a method of
+the node it needs (so the engine cancels it with the node); re-resolve the node
+from its owner after the await instead of carrying it; cancel the work when
+the owner frees the node (a generation counter). `is_instance_valid()` /
+`NodeGuard.is_alive()` clear the rule too, but belong only where the code does
+not own the lifetime at all (a remote player that can leave at any time).
 
 Rules:
 
-* `unguarded-node-access-after-await` - after the nearest preceding `await`
-  in a function (or anywhere in a loop body that awaits, or anywhere in a
-  lambda), a method call / `is` / `as` on a member, parameter or local that
-  may hold a node is only allowed once `is_instance_valid(name)` or
-  `NodeGuard.is_alive(name, ...)` was tested, or the name was reassigned.
-  Flow-insensitive, in source order.
+* `node-reference-across-await` - after the nearest preceding `await` in a
+  function (or anywhere in a loop body that awaits, or anywhere in a lambda),
+  a method call / `is` / `as` on a member, parameter or local that may hold a
+  node, unless the name was re-resolved (assigned) or validated in between.
+  Flow-insensitive, in source order; awaits inside one `if`/`match` branch do
+  not count for a sibling branch. The object whose coroutine or signal is
+  awaited is alive on resume.
+* `node-argument-across-await` - same, for a node-typed name passed as an
+  argument after an await (the callee will dereference it).
 * `node-null-comparison` - `name == null`, `name != null`, `not name` or a
-  bare `if name:` on a name that holds a node.
+  bare `if name:` on a name that holds a node: a freed instance is not null.
 
-A name "may hold a node" when its declared type is not matched by the
-`lifetime-safe-types` regex (built-ins, resources, RefCounted-like classes)
-or, for an untyped name, when it is not matched by `lifetime-safe-names`.
-Names starting with an uppercase letter (autoloads, classes, constants) and
-`self` are never tracked. `@onready` members live and die with `self`, so
-they are exempt from the await rule but not from the null-comparison rule.
+A name "may hold a node" when its declared type is not a built-in, an engine
+class that does not inherit Node, or matched by the `lifetime-safe-types`
+regex; an untyped name is tracked unless it matches `lifetime-safe-names`.
+`self`, uppercase names (autoloads, classes), engine singletons, `@onready`
+members, and nodes the class parents itself (`add_child`) and never frees from
+another function are exempt from the await rules.
 """
 
 import re
@@ -47,8 +54,8 @@ from ..common.utils import get_column, get_line
 from .engine_safe_types import ENGINE_SAFE_TYPES
 from .problem import Problem
 
-AWAIT_RULE = "unguarded-node-access-after-await"
-ARG_RULE = "unguarded-node-argument-after-await"
+AWAIT_RULE = "node-reference-across-await"
+ARG_RULE = "node-argument-across-await"
 NULL_RULE = "node-null-comparison"
 
 GUARD_FUNCTIONS = {"is_instance_valid"}
@@ -454,6 +461,24 @@ def _receiver_name(getattr_node: Tree) -> Tuple[Optional[str], bool]:
     return names[0], len(names) == 2
 
 
+def _awaited_owner(await_node: Tree) -> Optional[str]:
+    """NAME for `await NAME.method(...)` / `await NAME.signal`; else None."""
+    if not await_node.children:
+        return None
+    awaited = await_node.children[-1]
+    if not isinstance(awaited, Tree):
+        return None
+    if awaited.data == "getattr_call":
+        receiver, direct = _receiver_name(awaited.children[0])
+        return receiver if direct else None
+    if awaited.data == "getattr":
+        names = _attr_names(awaited)
+        first = awaited.children[0]
+        if len(names) == 2 and isinstance(first, Token) and first.type == "NAME":
+            return first.value
+    return None
+
+
 def _single_name(node) -> Optional[str]:
     """A bare NAME token, or `self.NAME`, as a name string."""
     if isinstance(node, Tree) and node.data == "expr" and len(node.children) == 1:
@@ -692,7 +717,13 @@ class _FunctionChecker:
         # arguments are checked against the previous await point.
         for child in node.children:
             self._walk_expr(child)
-        self._record_await(_position(node))
+        line, column = _position(node)
+        self._record_await((line, column))
+        # `await x.coroutine()` resumes synchronously when x's call completes
+        # and `await x.signal` when x emits: x is alive on resume either way.
+        owner = _awaited_owner(node)
+        if owner is not None:
+            self._record_guard(owner, (line, column + 1))
 
     def _walk_standalone_call(self, node: Tree) -> None:
         callee = node.children[0]
@@ -823,10 +854,12 @@ class _FunctionChecker:
             Problem(
                 name=rule,
                 description=(
-                    'Cannot {} "{}" after an await without checking it is still alive: '
-                    "it may have been freed while the function was suspended "
-                    "(use is_instance_valid() or NodeGuard.is_alive())"
-                ).format(what, name),
+                    'Cannot {what} "{name}" after an await: it may have been freed '
+                    "while the function was suspended. Make the async work a method "
+                    "of the node, re-resolve it after the await, or cancel the work "
+                    "when it is freed (is_instance_valid() only for a lifetime this "
+                    "code does not own)"
+                ).format(what=what, name=name),
                 line=get_line(node),
                 column=get_column(node),
             )

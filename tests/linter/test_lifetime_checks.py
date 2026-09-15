@@ -4,8 +4,8 @@ from gdtoolkit.linter import lint_code, DEFAULT_CONFIG
 
 from .common import simple_ok_check, simple_nok_check
 
-AWAIT_RULE = "unguarded-node-access-after-await"
-ARG_RULE = "unguarded-node-argument-after-await"
+AWAIT_RULE = "node-reference-across-await"
+ARG_RULE = "node-argument-across-await"
 NULL_RULE = "node-null-comparison"
 
 # Every file below is a Node script with an async helper; `disable` keeps the
@@ -292,6 +292,15 @@ func f(card: Control, flag: bool):
     else:
         card.show()
 """,
+# the object whose coroutine or signal is awaited is alive on resume
+"""
+var modal: Control
+func f(http: HTTPRequest):
+    await modal.async_open()
+    modal.show()
+    await http.request_completed
+    http.queue_free()
+""",
 # the emitter of the signal a lambda is connected to is alive inside it
 """
 func f():
@@ -553,7 +562,7 @@ def test_rules_can_be_ignored_inline():
 var modal: Control
 func f():
     await g()
-    modal.show()  # gdlint: ignore=unguarded-node-access-after-await
+    modal.show()  # gdlint: ignore=node-reference-across-await
     if modal == null:  # gdlint: ignore=node-null-comparison
         pass
 """

@@ -60,20 +60,27 @@ misc/MarkovianPCG.gd:96: Error: Function argument name "aPos" is not valid (func
 
 This fork adds three checks for code that runs on Godot's **release** export
 templates, where a method call, `is`/`as` or `for` on a freed object is a
-SIGSEGV instead of the logged error the debug template gives you:
+SIGSEGV instead of the logged error the debug template gives you. `await` is
+where references go stale; the engine protects `self` (a coroutine whose
+instance was freed is never resumed) but nothing else.
 
-- `unguarded-node-access-after-await` — after the nearest preceding `await`
-  in a function (or anywhere in a loop body that awaits, or inside a lambda),
-  calling a method on a member, parameter or local that may hold a node is
-  only allowed once `is_instance_valid(name)` / `NodeGuard.is_alive(name, ...)`
-  was tested or the name was reassigned. `self`, autoloads, `@onready`
-  members and members the instance `add_child`s itself are exempt.
-- `unguarded-node-argument-after-await` — same, for a node-typed name passed
-  as an argument after an await (the callee will dereference it).
+- `node-reference-across-await` — a method call on a member, parameter or
+  local that may hold a node, after the nearest preceding `await` (or anywhere
+  in a loop body that awaits, or inside a lambda), with no re-resolution
+  (assignment) or `is_instance_valid` / `NodeGuard.is_alive` in between. The
+  object whose coroutine or signal is awaited is alive on resume. `self`,
+  autoloads, engine singletons, `@onready` members and nodes the class parents
+  itself are exempt.
+- `node-argument-across-await` — same, for a node-typed name passed as an
+  argument after an await (the callee will dereference it).
 - `node-null-comparison` — `name == null` / `not name` / bare `if name:` on a
-  node-typed or scene-owned name: a freed instance is not null, so the test
-  does not detect it. Noisy on lazily-created children; meant for audits and
-  usually disabled in `.gdlintrc`.
+  node-typed or scene-owned name: a freed instance is not null. Noisy on
+  lazily-created children; meant for audits and usually disabled in `.gdlintrc`.
+
+The fix the first two ask for is structural: make the async work a method of
+the node it needs, re-resolve the node from its owner after the await, or
+cancel the work when the owner frees the node. Validity checks are for
+lifetimes the code does not own.
 
 A name "may hold a node" when its declared type is not a built-in, an engine
 class that does not inherit `Node`, or matched by the `lifetime-safe-types`

@@ -301,6 +301,22 @@ func f(root: Node):
     assert _names(code) == [(AWAIT_RULE, 7)]
 
 
+def test_inner_data_class_is_safe():
+    code = """
+class Response:
+    var elements := []
+class Row extends Control:
+    var x := 1
+func f():
+    var response := Response.new()
+    var row := Row.new()
+    await g()
+    response.elements.append(1)
+    row.show()
+"""
+    assert _names(code) == [(AWAIT_RULE, 11)]
+
+
 def test_loop_variable_after_await_in_body():
     code = """
 func f(cards: Array):

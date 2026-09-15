@@ -61,194 +61,169 @@ GUARD_METHODS = {("NodeGuard", "is_alive")}
 # changes.
 ENGINE_SAFE_TYPES = frozenset(
     """
-    AABB AESContext AStar2D AStar3D AStarGrid2D AnimatedTexture Animation AnimationLibrary
-    AnimationNode AnimationNodeAdd2 AnimationNodeAdd3 AnimationNodeAnimation AnimationNodeBlend2
-    AnimationNodeBlend3 AnimationNodeBlendSpace1D AnimationNodeBlendSpace2D AnimationNodeBlendTree
-    AnimationNodeExtension AnimationNodeOneShot AnimationNodeOutput AnimationNodeStateMachine
-    AnimationNodeStateMachinePlayback AnimationNodeStateMachineTransition AnimationNodeSub2
-    AnimationNodeSync AnimationNodeTimeScale AnimationNodeTimeSeek AnimationNodeTransition
-    AnimationRootNode Array ArrayMesh ArrayOccluder3D AtlasTexture AudioBusLayout AudioEffect
-    AudioEffectAmplify AudioEffectBandLimitFilter AudioEffectBandPassFilter AudioEffectCapture
-    AudioEffectChorus AudioEffectCompressor AudioEffectDelay AudioEffectDistortion AudioEffectEQ
-    AudioEffectEQ10 AudioEffectEQ21 AudioEffectEQ6 AudioEffectFilter AudioEffectHardLimiter
+    AABB AESContext AStar2D AStar3D AStarGrid2D AnimatedTexture Animation AnimationLibrary AnimationNode
+    AnimationNodeAdd2 AnimationNodeAdd3 AnimationNodeAnimation AnimationNodeBlend2 AnimationNodeBlend3
+    AnimationNodeBlendSpace1D AnimationNodeBlendSpace2D AnimationNodeBlendTree AnimationNodeExtension
+    AnimationNodeOneShot AnimationNodeOutput AnimationNodeStateMachine AnimationNodeStateMachinePlayback
+    AnimationNodeStateMachineTransition AnimationNodeSub2 AnimationNodeSync AnimationNodeTimeScale
+    AnimationNodeTimeSeek AnimationNodeTransition AnimationRootNode Array ArrayMesh ArrayOccluder3D AtlasTexture
+    AudioBusLayout AudioEffect AudioEffectAmplify AudioEffectBandLimitFilter AudioEffectBandPassFilter
+    AudioEffectCapture AudioEffectChorus AudioEffectCompressor AudioEffectDelay AudioEffectDistortion
+    AudioEffectEQ AudioEffectEQ10 AudioEffectEQ21 AudioEffectEQ6 AudioEffectFilter AudioEffectHardLimiter
     AudioEffectHighPassFilter AudioEffectHighShelfFilter AudioEffectInstance AudioEffectLimiter
-    AudioEffectLowPassFilter AudioEffectLowShelfFilter AudioEffectNotchFilter AudioEffectPanner
-    AudioEffectPhaser AudioEffectPitchShift AudioEffectRecord AudioEffectReverb
-    AudioEffectSpectrumAnalyzer AudioEffectSpectrumAnalyzerInstance AudioEffectStereoEnhance
-    AudioSample AudioSamplePlayback AudioServer AudioStream AudioStreamGenerator
-    AudioStreamGeneratorPlayback AudioStreamInteractive AudioStreamMP3 AudioStreamMicrophone
-    AudioStreamOggVorbis AudioStreamPlayback AudioStreamPlaybackInteractive
+    AudioEffectLowPassFilter AudioEffectLowShelfFilter AudioEffectNotchFilter AudioEffectPanner AudioEffectPhaser
+    AudioEffectPitchShift AudioEffectRecord AudioEffectReverb AudioEffectSpectrumAnalyzer
+    AudioEffectSpectrumAnalyzerInstance AudioEffectStereoEnhance AudioSample AudioSamplePlayback AudioServer
+    AudioStream AudioStreamGenerator AudioStreamGeneratorPlayback AudioStreamInteractive AudioStreamMP3
+    AudioStreamMicrophone AudioStreamOggVorbis AudioStreamPlayback AudioStreamPlaybackInteractive
     AudioStreamPlaybackOggVorbis AudioStreamPlaybackPlaylist AudioStreamPlaybackPolyphonic
-    AudioStreamPlaybackResampled AudioStreamPlaybackSynchronized AudioStreamPlaylist
-    AudioStreamPolyphonic AudioStreamRandomizer AudioStreamSynchronized AudioStreamWAV
-    BaseMaterial3D Basis BitMap BoneMap BoxMesh BoxOccluder3D BoxShape3D ButtonGroup Callable
-    CallbackTweener CameraAttributes CameraAttributesPhysical CameraAttributesPractical CameraFeed
-    CameraServer CameraTexture CanvasItemMaterial CanvasTexture CapsuleMesh CapsuleShape2D
-    CapsuleShape3D CharFXTransform CircleShape2D ClassDB CodeHighlighter Color ColorPalette
+    AudioStreamPlaybackResampled AudioStreamPlaybackSynchronized AudioStreamPlaylist AudioStreamPolyphonic
+    AudioStreamRandomizer AudioStreamSynchronized AudioStreamWAV BaseMaterial3D Basis BitMap BoneMap BoxMesh
+    BoxOccluder3D BoxShape3D ButtonGroup Callable CallbackTweener CameraAttributes CameraAttributesPhysical
+    CameraAttributesPractical CameraFeed CameraServer CameraTexture CanvasItemMaterial CanvasTexture CapsuleMesh
+    CapsuleShape2D CapsuleShape3D CharFXTransform CircleShape2D ClassDB CodeHighlighter Color ColorPalette
     Compositor CompositorEffect CompressedCubemap CompressedCubemapArray CompressedTexture2D
     CompressedTexture2DArray CompressedTexture3D CompressedTextureLayered ConcavePolygonShape2D
-    ConcavePolygonShape3D ConfigFile ConvexPolygonShape2D ConvexPolygonShape3D Crypto CryptoKey
-    Cubemap CubemapArray Curve Curve2D Curve3D CurveTexture CurveXYZTexture CylinderMesh
-    CylinderShape3D DPITexture DTLSServer Dictionary DirAccess DisplayServer ENetConnection
-    ENetMultiplayerPeer ENetPacketPeer EditorContextMenuPlugin EditorDebuggerPlugin
-    EditorDebuggerSession EditorExportPlatform EditorExportPlatformAndroid
-    EditorExportPlatformAppleEmbedded EditorExportPlatformExtension EditorExportPlatformIOS
-    EditorExportPlatformLinuxBSD EditorExportPlatformMacOS EditorExportPlatformPC
-    EditorExportPlatformVisionOS EditorExportPlatformWeb EditorExportPlatformWindows
-    EditorExportPlugin EditorExportPreset EditorFeatureProfile EditorFileSystemDirectory
-    EditorFileSystemImportFormatSupportQuery EditorImportPlugin EditorInspectorPlugin
-    EditorInterface EditorNode3DGizmo EditorNode3DGizmoPlugin EditorPaths
+    ConcavePolygonShape3D ConfigFile ConvexPolygonShape2D ConvexPolygonShape3D Crypto CryptoKey Cubemap
+    CubemapArray Curve Curve2D Curve3D CurveTexture CurveXYZTexture CylinderMesh CylinderShape3D DPITexture
+    DTLSServer Dictionary DirAccess DisplayServer ENetConnection ENetMultiplayerPeer ENetPacketPeer
+    EditorContextMenuPlugin EditorDebuggerPlugin EditorDebuggerSession EditorExportPlatform
+    EditorExportPlatformAndroid EditorExportPlatformAppleEmbedded EditorExportPlatformExtension
+    EditorExportPlatformIOS EditorExportPlatformLinuxBSD EditorExportPlatformMacOS EditorExportPlatformPC
+    EditorExportPlatformVisionOS EditorExportPlatformWeb EditorExportPlatformWindows EditorExportPlugin
+    EditorExportPreset EditorFeatureProfile EditorFileSystemDirectory EditorFileSystemImportFormatSupportQuery
+    EditorImportPlugin EditorInspectorPlugin EditorInterface EditorNode3DGizmo EditorNode3DGizmoPlugin EditorPaths
     EditorResourceConversionPlugin EditorResourcePreviewGenerator EditorResourceTooltipPlugin
     EditorSceneFormatImporter EditorSceneFormatImporterBlend EditorSceneFormatImporterFBX2GLTF
-    EditorSceneFormatImporterGLTF EditorSceneFormatImporterUFBX EditorScenePostImport
-    EditorScenePostImportPlugin EditorScript EditorSelection EditorSettings EditorSyntaxHighlighter
-    EditorTranslationParserPlugin EditorUndoRedoManager EditorVCSInterface EncodedObjectAsID Engine
-    EngineDebugger EngineProfiler Environment Error Expression ExternalTexture FBXDocument FBXState
-    FastNoiseLite FileAccess FogMaterial FoldableGroup Font FontFile FontVariation
-    FramebufferCacheRD GDExtension GDExtensionManager GDScript GDScriptEditorTranslationParserPlugin
-    GDScriptNativeClass GDScriptSyntaxHighlighter GLTFAccessor GLTFAnimation GLTFBufferView
-    GLTFCamera GLTFDocument GLTFDocumentExtension GLTFDocumentExtensionConvertImporterMesh
-    GLTFDocumentExtensionPhysics GLTFDocumentExtensionTextureKTX GLTFDocumentExtensionTextureWebP
-    GLTFLight GLTFMesh GLTFNode GLTFObjectModelProperty GLTFPhysicsBody GLTFPhysicsShape
-    GLTFSkeleton GLTFSkin GLTFSpecGloss GLTFState GLTFTexture GLTFTextureSampler Geometry2D
-    Geometry3D GodotInstance GodotNavigationServer2D GodotPhysicsServer2D GodotPhysicsServer3D
-    Gradient GradientTexture1D GradientTexture2D HMACContext HTTPClient HashingContext
-    HeightMapShape3D IP IPUnix Image ImageFormatLoader ImageFormatLoaderExtension ImageTexture
+    EditorSceneFormatImporterGLTF EditorSceneFormatImporterUFBX EditorScenePostImport EditorScenePostImportPlugin
+    EditorScript EditorSelection EditorSettings EditorSyntaxHighlighter EditorTranslationParserPlugin
+    EditorUndoRedoManager EditorVCSInterface EncodedObjectAsID Engine EngineDebugger EngineProfiler Environment
+    Error Expression ExternalTexture FBXDocument FBXState FastNoiseLite FileAccess FogMaterial FoldableGroup Font
+    FontFile FontVariation FramebufferCacheRD GDExtension GDExtensionManager GDScript
+    GDScriptEditorTranslationParserPlugin GDScriptNativeClass GDScriptSyntaxHighlighter GLTFAccessor GLTFAnimation
+    GLTFBufferView GLTFCamera GLTFDocument GLTFDocumentExtension GLTFDocumentExtensionConvertImporterMesh
+    GLTFDocumentExtensionPhysics GLTFDocumentExtensionTextureKTX GLTFDocumentExtensionTextureWebP GLTFLight
+    GLTFMesh GLTFNode GLTFObjectModelProperty GLTFPhysicsBody GLTFPhysicsShape GLTFSkeleton GLTFSkin GLTFSpecGloss
+    GLTFState GLTFTexture GLTFTextureSampler Geometry2D Geometry3D GodotInstance GodotNavigationServer2D
+    GodotPhysicsServer2D GodotPhysicsServer3D Gradient GradientTexture1D GradientTexture2D HMACContext HTTPClient
+    HashingContext HeightMapShape3D IP IPUnix Image ImageFormatLoader ImageFormatLoaderExtension ImageTexture
     ImageTexture3D ImageTextureLayered ImmediateMesh ImporterMesh Input InputEvent InputEventAction
-    InputEventFromWindow InputEventGesture InputEventJoypadButton InputEventJoypadMotion
-    InputEventKey InputEventMIDI InputEventMagnifyGesture InputEventMouse InputEventMouseButton
-    InputEventMouseMotion InputEventPanGesture InputEventScreenDrag InputEventScreenTouch
-    InputEventShortcut InputEventWithModifiers InputMap IntervalTweener JNISingleton JSON JSONRPC
-    JavaClass JavaClassWrapper JavaObject JavaScriptBridge JavaScriptObject JointLimitation3D
-    JointLimitationCone3D KinematicCollision2D KinematicCollision3D LabelSettings LightmapGIData
-    Lightmapper LightmapperRD Logger MainLoop Marshalls Material Mesh
-    MeshConvexDecompositionSettings MeshDataTool MeshLibrary MeshTexture MethodTweener
-    MissingResource MobileVRInterface MovieWriter MovieWriterMJPEG MovieWriterOGV MovieWriterPNGWAV
-    MultiMesh MultiplayerAPI MultiplayerAPIExtension MultiplayerPeer MultiplayerPeerExtension Mutex
-    NativeMenu NavigationMesh NavigationMeshGenerator NavigationMeshSourceGeometryData2D
-    NavigationMeshSourceGeometryData3D NavigationPathQueryParameters2D
-    NavigationPathQueryParameters3D NavigationPathQueryResult2D NavigationPathQueryResult3D
-    NavigationPolygon NavigationServer2D NavigationServer2DManager NavigationServer3D
-    NavigationServer3DManager Node3DGizmo NodePath Noise NoiseTexture2D NoiseTexture3D ORMMaterial3D
-    OS Occluder3D OccluderPolygon2D OfflineMultiplayerPeer OggPacketSequence
-    OggPacketSequencePlayback OpenXRAPIExtension OpenXRAction OpenXRActionBindingModifier
-    OpenXRActionMap OpenXRActionSet OpenXRAnalogThresholdModifier OpenXRAnchorTracker
-    OpenXRAndroidThreadSettingsExtension OpenXRBindingModifier OpenXRDpadBindingModifier
-    OpenXRExtensionWrapper OpenXRExtensionWrapperExtension OpenXRFrameSynthesisExtension
-    OpenXRFutureExtension OpenXRFutureResult OpenXRHapticBase OpenXRHapticVibration OpenXRIPBinding
-    OpenXRIPBindingModifier OpenXRInteractionProfile OpenXRInteractionProfileMetadata
-    OpenXRInterface OpenXRMarkerTracker OpenXRPlaneTracker OpenXRRenderModelExtension
-    OpenXRSpatialAnchorCapability OpenXRSpatialCapabilityConfigurationAnchor
-    OpenXRSpatialCapabilityConfigurationAprilTag OpenXRSpatialCapabilityConfigurationAruco
-    OpenXRSpatialCapabilityConfigurationBaseHeader OpenXRSpatialCapabilityConfigurationMicroQrCode
-    OpenXRSpatialCapabilityConfigurationPlaneTracking OpenXRSpatialCapabilityConfigurationQrCode
-    OpenXRSpatialComponentAnchorList OpenXRSpatialComponentBounded2DList
-    OpenXRSpatialComponentBounded3DList OpenXRSpatialComponentData OpenXRSpatialComponentMarkerList
-    OpenXRSpatialComponentMesh2DList OpenXRSpatialComponentMesh3DList
+    InputEventFromWindow InputEventGesture InputEventJoypadButton InputEventJoypadMotion InputEventKey
+    InputEventMIDI InputEventMagnifyGesture InputEventMouse InputEventMouseButton InputEventMouseMotion
+    InputEventPanGesture InputEventScreenDrag InputEventScreenTouch InputEventShortcut InputEventWithModifiers
+    InputMap IntervalTweener JNISingleton JSON JSONRPC JavaClass JavaClassWrapper JavaObject JavaScriptBridge
+    JavaScriptObject JointLimitation3D JointLimitationCone3D KinematicCollision2D KinematicCollision3D
+    LabelSettings LightmapGIData Lightmapper LightmapperRD Logger MainLoop Marshalls Material Mesh
+    MeshConvexDecompositionSettings MeshDataTool MeshLibrary MeshTexture MethodTweener MissingResource
+    MobileVRInterface MovieWriter MovieWriterMJPEG MovieWriterOGV MovieWriterPNGWAV MultiMesh MultiplayerAPI
+    MultiplayerAPIExtension MultiplayerPeer MultiplayerPeerExtension Mutex NativeMenu NavigationMesh
+    NavigationMeshGenerator NavigationMeshSourceGeometryData2D NavigationMeshSourceGeometryData3D
+    NavigationPathQueryParameters2D NavigationPathQueryParameters3D NavigationPathQueryResult2D
+    NavigationPathQueryResult3D NavigationPolygon NavigationServer2D NavigationServer2DManager NavigationServer3D
+    NavigationServer3DManager Node3DGizmo NodePath Noise NoiseTexture2D NoiseTexture3D ORMMaterial3D OS Occluder3D
+    OccluderPolygon2D OfflineMultiplayerPeer OggPacketSequence OggPacketSequencePlayback OpenXRAPIExtension
+    OpenXRAction OpenXRActionBindingModifier OpenXRActionMap OpenXRActionSet OpenXRAnalogThresholdModifier
+    OpenXRAnchorTracker OpenXRAndroidThreadSettingsExtension OpenXRBindingModifier OpenXRDpadBindingModifier
+    OpenXRExtensionWrapper OpenXRExtensionWrapperExtension OpenXRFrameSynthesisExtension OpenXRFutureExtension
+    OpenXRFutureResult OpenXRHapticBase OpenXRHapticVibration OpenXRIPBinding OpenXRIPBindingModifier
+    OpenXRInteractionProfile OpenXRInteractionProfileMetadata OpenXRInterface OpenXRMarkerTracker
+    OpenXRPlaneTracker OpenXRRenderModelExtension OpenXRSpatialAnchorCapability
+    OpenXRSpatialCapabilityConfigurationAnchor OpenXRSpatialCapabilityConfigurationAprilTag
+    OpenXRSpatialCapabilityConfigurationAruco OpenXRSpatialCapabilityConfigurationBaseHeader
+    OpenXRSpatialCapabilityConfigurationMicroQrCode OpenXRSpatialCapabilityConfigurationPlaneTracking
+    OpenXRSpatialCapabilityConfigurationQrCode OpenXRSpatialComponentAnchorList
+    OpenXRSpatialComponentBounded2DList OpenXRSpatialComponentBounded3DList OpenXRSpatialComponentData
+    OpenXRSpatialComponentMarkerList OpenXRSpatialComponentMesh2DList OpenXRSpatialComponentMesh3DList
     OpenXRSpatialComponentParentList OpenXRSpatialComponentPersistenceList
     OpenXRSpatialComponentPlaneAlignmentList OpenXRSpatialComponentPlaneSemanticLabelList
-    OpenXRSpatialComponentPolygon2DList OpenXRSpatialContextPersistenceConfig
-    OpenXRSpatialEntityExtension OpenXRSpatialEntityTracker OpenXRSpatialMarkerTrackingCapability
-    OpenXRSpatialPlaneTrackingCapability OpenXRSpatialQueryResultData OpenXRStructureBase
-    OptimizedTranslation PCKPacker PackedByteArray PackedColorArray PackedDataContainer
-    PackedDataContainerRef PackedFloat32Array PackedFloat64Array PackedInt32Array PackedInt64Array
-    PackedScene PackedStringArray PackedVector2Array PackedVector3Array PackedVector4Array
-    PacketPeer PacketPeerDTLS PacketPeerExtension PacketPeerStream PacketPeerUDP PanoramaSkyMaterial
-    ParticleProcessMaterial Performance PhysicalSkyMaterial PhysicsDirectBodyState2D
+    OpenXRSpatialComponentPolygon2DList OpenXRSpatialContextPersistenceConfig OpenXRSpatialEntityExtension
+    OpenXRSpatialEntityTracker OpenXRSpatialMarkerTrackingCapability OpenXRSpatialPlaneTrackingCapability
+    OpenXRSpatialQueryResultData OpenXRStructureBase OptimizedTranslation PCKPacker PackedByteArray
+    PackedColorArray PackedDataContainer PackedDataContainerRef PackedFloat32Array PackedFloat64Array
+    PackedInt32Array PackedInt64Array PackedScene PackedStringArray PackedVector2Array PackedVector3Array
+    PackedVector4Array PacketPeer PacketPeerDTLS PacketPeerExtension PacketPeerStream PacketPeerUDP
+    PanoramaSkyMaterial ParticleProcessMaterial Performance PhysicalSkyMaterial PhysicsDirectBodyState2D
     PhysicsDirectBodyState2DExtension PhysicsDirectBodyState3D PhysicsDirectBodyState3DExtension
     PhysicsDirectSpaceState2D PhysicsDirectSpaceState2DExtension PhysicsDirectSpaceState3D
-    PhysicsDirectSpaceState3DExtension PhysicsMaterial PhysicsPointQueryParameters2D
-    PhysicsPointQueryParameters3D PhysicsRayQueryParameters2D PhysicsRayQueryParameters3D
-    PhysicsServer2D PhysicsServer2DExtension PhysicsServer2DManager PhysicsServer3D
-    PhysicsServer3DExtension PhysicsServer3DManager PhysicsServer3DRenderingServerHandler
-    PhysicsShapeQueryParameters2D PhysicsShapeQueryParameters3D PhysicsTestMotionParameters2D
-    PhysicsTestMotionParameters3D PhysicsTestMotionResult2D PhysicsTestMotionResult3D
-    PlaceholderCubemap PlaceholderCubemapArray PlaceholderMaterial PlaceholderMesh
-    PlaceholderTexture2D PlaceholderTexture2DArray PlaceholderTexture3D PlaceholderTextureLayered
-    Plane PlaneMesh PointMesh PolygonOccluder3D PolygonPathFinder PortableCompressedTexture2D
-    PrimitiveMesh PrismMesh ProceduralSkyMaterial ProjectSettings Projection PropertyTweener
-    QuadMesh QuadOccluder3D Quaternion RDAttachmentFormat RDFramebufferPass
-    RDPipelineColorBlendState RDPipelineColorBlendStateAttachment RDPipelineDepthStencilState
-    RDPipelineMultisampleState RDPipelineRasterizationState RDPipelineSpecializationConstant
-    RDSamplerState RDShaderFile RDShaderSPIRV RDShaderSource RDTextureFormat RDTextureView RDUniform
-    RDVertexAttribute RID RandomNumberGenerator Rect2 Rect2i RectangleShape2D RefCounted RegEx
-    RegExMatch RenderData RenderDataExtension RenderDataRD RenderSceneBuffers
+    PhysicsDirectSpaceState3DExtension PhysicsMaterial PhysicsPointQueryParameters2D PhysicsPointQueryParameters3D
+    PhysicsRayQueryParameters2D PhysicsRayQueryParameters3D PhysicsServer2D PhysicsServer2DExtension
+    PhysicsServer2DManager PhysicsServer3D PhysicsServer3DExtension PhysicsServer3DManager
+    PhysicsServer3DRenderingServerHandler PhysicsShapeQueryParameters2D PhysicsShapeQueryParameters3D
+    PhysicsTestMotionParameters2D PhysicsTestMotionParameters3D PhysicsTestMotionResult2D
+    PhysicsTestMotionResult3D PlaceholderCubemap PlaceholderCubemapArray PlaceholderMaterial PlaceholderMesh
+    PlaceholderTexture2D PlaceholderTexture2DArray PlaceholderTexture3D PlaceholderTextureLayered Plane PlaneMesh
+    PointMesh PolygonOccluder3D PolygonPathFinder PortableCompressedTexture2D PrimitiveMesh PrismMesh
+    ProceduralSkyMaterial ProjectSettings Projection PropertyTweener QuadMesh QuadOccluder3D Quaternion
+    RDAttachmentFormat RDFramebufferPass RDPipelineColorBlendState RDPipelineColorBlendStateAttachment
+    RDPipelineDepthStencilState RDPipelineMultisampleState RDPipelineRasterizationState
+    RDPipelineSpecializationConstant RDSamplerState RDShaderFile RDShaderSPIRV RDShaderSource RDTextureFormat
+    RDTextureView RDUniform RDVertexAttribute RID RandomNumberGenerator Rect2 Rect2i RectangleShape2D RefCounted
+    RegEx RegExMatch RenderData RenderDataExtension RenderDataRD RenderSceneBuffers
     RenderSceneBuffersConfiguration RenderSceneBuffersExtension RenderSceneBuffersRD RenderSceneData
     RenderSceneDataExtension RenderSceneDataRD RenderingDevice RenderingServer Resource
-    ResourceFormatImporterSaver ResourceFormatLoader ResourceFormatSaver ResourceImporter
-    ResourceImporterBMFont ResourceImporterBitMap ResourceImporterCSVTranslation
-    ResourceImporterDynamicFont ResourceImporterImage ResourceImporterImageFont
-    ResourceImporterLayeredTexture ResourceImporterMP3 ResourceImporterOBJ ResourceImporterOggVorbis
-    ResourceImporterSVG ResourceImporterScene ResourceImporterShaderFile ResourceImporterTexture
-    ResourceImporterTextureAtlas ResourceImporterWAV ResourceLoader ResourceSaver ResourceUID
-    RibbonTrailMesh RichTextEffect SceneCacheInterface SceneMultiplayer SceneRPCInterface
-    SceneReplicationConfig SceneReplicationInterface SceneState SceneTree SceneTreeTimer Script
-    ScriptBacktrace ScriptExtension ScriptLanguage ScriptLanguageExtension SegmentShape2D Semaphore
+    ResourceFormatImporterSaver ResourceFormatLoader ResourceFormatSaver ResourceImporter ResourceImporterBMFont
+    ResourceImporterBitMap ResourceImporterCSVTranslation ResourceImporterDynamicFont ResourceImporterImage
+    ResourceImporterImageFont ResourceImporterLayeredTexture ResourceImporterMP3 ResourceImporterOBJ
+    ResourceImporterOggVorbis ResourceImporterSVG ResourceImporterScene ResourceImporterShaderFile
+    ResourceImporterTexture ResourceImporterTextureAtlas ResourceImporterWAV ResourceLoader ResourceSaver
+    ResourceUID RibbonTrailMesh RichTextEffect SceneCacheInterface SceneMultiplayer SceneRPCInterface
+    SceneReplicationConfig SceneReplicationInterface SceneState SceneTree SceneTreeTimer Script ScriptBacktrace
+    ScriptExtension ScriptLanguage ScriptLanguageExtension SegmentShape2D Semaphore
     SentryEditorExportPluginAndroid SentryEditorExportPluginIOS SentryEditorExportPluginUnix
-    SentryEditorExportPluginWeb SeparationRayShape2D SeparationRayShape3D Shader ShaderInclude
-    ShaderIncludeDB ShaderMaterial Shape2D Shape3D Shortcut Signal SkeletonModification2D
-    SkeletonModification2DCCDIK SkeletonModification2DFABRIK SkeletonModification2DJiggle
-    SkeletonModification2DLookAt SkeletonModification2DPhysicalBones
-    SkeletonModification2DStackHolder SkeletonModification2DTwoBoneIK SkeletonModificationStack2D
-    SkeletonProfile SkeletonProfileHumanoid Skin SkinReference Sky SocketServer SphereMesh
-    SphereOccluder3D SphereShape3D SpriteFrames StandardMaterial3D StreamPeer StreamPeerBuffer
-    StreamPeerExtension StreamPeerGZIP StreamPeerSocket StreamPeerTCP StreamPeerTLS StreamPeerUDS
-    String StringName StyleBox StyleBoxEmpty StyleBoxFlat StyleBoxLine StyleBoxTexture
-    SubtweenTweener SurfaceTool SyntaxHighlighter SystemFont TCPServer TLSOptions TextLine TextMesh
-    TextParagraph TextServer TextServerAdvanced TextServerDummy TextServerExtension
-    TextServerFallback TextServerManager Texture Texture2D Texture2DArray Texture2DArrayRD
-    Texture2DRD Texture3D Texture3DRD TextureCubemapArrayRD TextureCubemapRD TextureLayered
-    TextureLayeredRD Theme ThemeContext ThemeDB Thread TileData TileMapPattern TileSet
-    TileSetAtlasSource TileSetScenesCollectionSource TileSetSource Time TorusMesh Transform2D
-    Transform3D Translation TranslationDomain TranslationServer TreeItem TriangleMesh TubeTrailMesh
-    Tween Tweener UDPServer UDSServer UPNP UPNPDevice UndoRedo UniformSetCacheRD Variant Vector2
-    Vector2i Vector3 Vector3i Vector4 Vector4i VideoStream VideoStreamPlayback VideoStreamTheora
-    ViewportTexture VisualShader VisualShaderNode VisualShaderNodeBillboard
-    VisualShaderNodeBooleanConstant VisualShaderNodeBooleanParameter VisualShaderNodeClamp
-    VisualShaderNodeColorConstant VisualShaderNodeColorFunc VisualShaderNodeColorOp
-    VisualShaderNodeColorParameter VisualShaderNodeComment VisualShaderNodeCompare
-    VisualShaderNodeConstant VisualShaderNodeCubemap VisualShaderNodeCubemapParameter
-    VisualShaderNodeCurveTexture VisualShaderNodeCurveXYZTexture VisualShaderNodeCustom
-    VisualShaderNodeDerivativeFunc VisualShaderNodeDeterminant VisualShaderNodeDistanceFade
-    VisualShaderNodeDotProduct VisualShaderNodeExpression VisualShaderNodeFaceForward
-    VisualShaderNodeFloatConstant VisualShaderNodeFloatFunc VisualShaderNodeFloatOp
-    VisualShaderNodeFloatParameter VisualShaderNodeFrame VisualShaderNodeFresnel
-    VisualShaderNodeGlobalExpression VisualShaderNodeGroupBase VisualShaderNodeIf
-    VisualShaderNodeInput VisualShaderNodeIntConstant VisualShaderNodeIntFunc VisualShaderNodeIntOp
-    VisualShaderNodeIntParameter VisualShaderNodeIs VisualShaderNodeLinearSceneDepth
-    VisualShaderNodeMix VisualShaderNodeMultiplyAdd VisualShaderNodeOuterProduct
+    SentryEditorExportPluginWeb SeparationRayShape2D SeparationRayShape3D Shader ShaderInclude ShaderIncludeDB
+    ShaderMaterial Shape2D Shape3D Shortcut Signal SkeletonModification2D SkeletonModification2DCCDIK
+    SkeletonModification2DFABRIK SkeletonModification2DJiggle SkeletonModification2DLookAt
+    SkeletonModification2DPhysicalBones SkeletonModification2DStackHolder SkeletonModification2DTwoBoneIK
+    SkeletonModificationStack2D SkeletonProfile SkeletonProfileHumanoid Skin SkinReference Sky SocketServer
+    SphereMesh SphereOccluder3D SphereShape3D SpriteFrames StandardMaterial3D StreamPeer StreamPeerBuffer
+    StreamPeerExtension StreamPeerGZIP StreamPeerSocket StreamPeerTCP StreamPeerTLS StreamPeerUDS String
+    StringName StyleBox StyleBoxEmpty StyleBoxFlat StyleBoxLine StyleBoxTexture SubtweenTweener SurfaceTool
+    SyntaxHighlighter SystemFont TCPServer TLSOptions TextLine TextMesh TextParagraph TextServer
+    TextServerAdvanced TextServerDummy TextServerExtension TextServerFallback TextServerManager Texture Texture2D
+    Texture2DArray Texture2DArrayRD Texture2DRD Texture3D Texture3DRD TextureCubemapArrayRD TextureCubemapRD
+    TextureLayered TextureLayeredRD Theme ThemeContext ThemeDB Thread TileData TileMapPattern TileSet
+    TileSetAtlasSource TileSetScenesCollectionSource TileSetSource Time TorusMesh Transform2D Transform3D
+    Translation TranslationDomain TranslationServer TreeItem TriangleMesh TubeTrailMesh Tween Tweener UDPServer
+    UDSServer UPNP UPNPDevice UndoRedo UniformSetCacheRD Variant Vector2 Vector2i Vector3 Vector3i Vector4
+    Vector4i VideoStream VideoStreamPlayback VideoStreamTheora ViewportTexture VisualShader VisualShaderNode
+    VisualShaderNodeBillboard VisualShaderNodeBooleanConstant VisualShaderNodeBooleanParameter
+    VisualShaderNodeClamp VisualShaderNodeColorConstant VisualShaderNodeColorFunc VisualShaderNodeColorOp
+    VisualShaderNodeColorParameter VisualShaderNodeComment VisualShaderNodeCompare VisualShaderNodeConstant
+    VisualShaderNodeCubemap VisualShaderNodeCubemapParameter VisualShaderNodeCurveTexture
+    VisualShaderNodeCurveXYZTexture VisualShaderNodeCustom VisualShaderNodeDerivativeFunc
+    VisualShaderNodeDeterminant VisualShaderNodeDistanceFade VisualShaderNodeDotProduct VisualShaderNodeExpression
+    VisualShaderNodeFaceForward VisualShaderNodeFloatConstant VisualShaderNodeFloatFunc VisualShaderNodeFloatOp
+    VisualShaderNodeFloatParameter VisualShaderNodeFrame VisualShaderNodeFresnel VisualShaderNodeGlobalExpression
+    VisualShaderNodeGroupBase VisualShaderNodeIf VisualShaderNodeInput VisualShaderNodeIntConstant
+    VisualShaderNodeIntFunc VisualShaderNodeIntOp VisualShaderNodeIntParameter VisualShaderNodeIs
+    VisualShaderNodeLinearSceneDepth VisualShaderNodeMix VisualShaderNodeMultiplyAdd VisualShaderNodeOuterProduct
     VisualShaderNodeOutput VisualShaderNodeParameter VisualShaderNodeParameterRef
-    VisualShaderNodeParticleAccelerator VisualShaderNodeParticleBoxEmitter
-    VisualShaderNodeParticleConeVelocity VisualShaderNodeParticleEmit
-    VisualShaderNodeParticleEmitter VisualShaderNodeParticleMeshEmitter
-    VisualShaderNodeParticleMultiplyByAxisAngle VisualShaderNodeParticleOutput
-    VisualShaderNodeParticleRandomness VisualShaderNodeParticleRingEmitter
-    VisualShaderNodeParticleSphereEmitter VisualShaderNodeProximityFade VisualShaderNodeRandomRange
-    VisualShaderNodeRemap VisualShaderNodeReroute VisualShaderNodeResizableBase
+    VisualShaderNodeParticleAccelerator VisualShaderNodeParticleBoxEmitter VisualShaderNodeParticleConeVelocity
+    VisualShaderNodeParticleEmit VisualShaderNodeParticleEmitter VisualShaderNodeParticleMeshEmitter
+    VisualShaderNodeParticleMultiplyByAxisAngle VisualShaderNodeParticleOutput VisualShaderNodeParticleRandomness
+    VisualShaderNodeParticleRingEmitter VisualShaderNodeParticleSphereEmitter VisualShaderNodeProximityFade
+    VisualShaderNodeRandomRange VisualShaderNodeRemap VisualShaderNodeReroute VisualShaderNodeResizableBase
     VisualShaderNodeRotationByAxis VisualShaderNodeSDFRaymarch VisualShaderNodeSDFToScreenUV
     VisualShaderNodeSample3D VisualShaderNodeScreenNormalWorldSpace VisualShaderNodeScreenUVToSDF
     VisualShaderNodeSmoothStep VisualShaderNodeStep VisualShaderNodeSwitch VisualShaderNodeTexture
-    VisualShaderNodeTexture2DArray VisualShaderNodeTexture2DArrayParameter
-    VisualShaderNodeTexture2DParameter VisualShaderNodeTexture3D VisualShaderNodeTexture3DParameter
-    VisualShaderNodeTextureParameter VisualShaderNodeTextureParameterTriplanar
-    VisualShaderNodeTextureSDF VisualShaderNodeTextureSDFNormal VisualShaderNodeTransformCompose
-    VisualShaderNodeTransformConstant VisualShaderNodeTransformDecompose
+    VisualShaderNodeTexture2DArray VisualShaderNodeTexture2DArrayParameter VisualShaderNodeTexture2DParameter
+    VisualShaderNodeTexture3D VisualShaderNodeTexture3DParameter VisualShaderNodeTextureParameter
+    VisualShaderNodeTextureParameterTriplanar VisualShaderNodeTextureSDF VisualShaderNodeTextureSDFNormal
+    VisualShaderNodeTransformCompose VisualShaderNodeTransformConstant VisualShaderNodeTransformDecompose
     VisualShaderNodeTransformFunc VisualShaderNodeTransformOp VisualShaderNodeTransformParameter
-    VisualShaderNodeTransformVecMult VisualShaderNodeUIntConstant VisualShaderNodeUIntFunc
-    VisualShaderNodeUIntOp VisualShaderNodeUIntParameter VisualShaderNodeUVFunc
-    VisualShaderNodeUVPolarCoord VisualShaderNodeVarying VisualShaderNodeVaryingGetter
-    VisualShaderNodeVaryingSetter VisualShaderNodeVec2Constant VisualShaderNodeVec2Parameter
-    VisualShaderNodeVec3Constant VisualShaderNodeVec3Parameter VisualShaderNodeVec4Constant
-    VisualShaderNodeVec4Parameter VisualShaderNodeVectorBase VisualShaderNodeVectorCompose
-    VisualShaderNodeVectorDecompose VisualShaderNodeVectorDistance VisualShaderNodeVectorFunc
-    VisualShaderNodeVectorLen VisualShaderNodeVectorOp VisualShaderNodeVectorRefract
-    VisualShaderNodeWorldPositionFromDepth VoxelGIData WeakRef WebRTCDataChannel
-    WebRTCDataChannelExtension WebRTCMultiplayerPeer WebRTCPeerConnection
-    WebRTCPeerConnectionExtension WebSocketMultiplayerPeer WebSocketPeer WebXRInterface
-    WorkerThreadPool World2D World3D WorldBoundaryShape2D WorldBoundaryShape3D X509Certificate
-    XMLParser XRBodyTracker XRControllerTracker XRFaceTracker XRHandTracker XRInterface
-    XRInterfaceExtension XRPose XRPositionalTracker XRServer XRTracker XRVRS ZIPPacker ZIPReader
-    bool float int void
+    VisualShaderNodeTransformVecMult VisualShaderNodeUIntConstant VisualShaderNodeUIntFunc VisualShaderNodeUIntOp
+    VisualShaderNodeUIntParameter VisualShaderNodeUVFunc VisualShaderNodeUVPolarCoord VisualShaderNodeVarying
+    VisualShaderNodeVaryingGetter VisualShaderNodeVaryingSetter VisualShaderNodeVec2Constant
+    VisualShaderNodeVec2Parameter VisualShaderNodeVec3Constant VisualShaderNodeVec3Parameter
+    VisualShaderNodeVec4Constant VisualShaderNodeVec4Parameter VisualShaderNodeVectorBase
+    VisualShaderNodeVectorCompose VisualShaderNodeVectorDecompose VisualShaderNodeVectorDistance
+    VisualShaderNodeVectorFunc VisualShaderNodeVectorLen VisualShaderNodeVectorOp VisualShaderNodeVectorRefract
+    VisualShaderNodeWorldPositionFromDepth VoxelGIData WeakRef WebRTCDataChannel WebRTCDataChannelExtension
+    WebRTCMultiplayerPeer WebRTCPeerConnection WebRTCPeerConnectionExtension WebSocketMultiplayerPeer
+    WebSocketPeer WebXRInterface WorkerThreadPool World2D World3D WorldBoundaryShape2D WorldBoundaryShape3D
+    X509Certificate XMLParser XRBodyTracker XRControllerTracker XRFaceTracker XRHandTracker XRInterface
+    XRInterfaceExtension XRPose XRPositionalTracker XRServer XRTracker XRVRS ZIPPacker ZIPReader bool float int
+    void
     """.split()
 )
 

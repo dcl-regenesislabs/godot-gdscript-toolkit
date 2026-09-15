@@ -626,6 +626,14 @@ def _end_position(node) -> Position:
     return (node.end_line, node.end_column)
 
 
+def _latest(a: Optional[Position], b: Optional[Position]) -> Optional[Position]:
+    if a is None:
+        return b
+    if b is None:
+        return a
+    return max(a, b)
+
+
 def _is_trackable(name: str) -> bool:
     return name != "self" and not name[0].isupper()
 
@@ -731,13 +739,21 @@ class _FunctionChecker:
         elif kind == "const_stmt":
             pass
         elif kind == "if_stmt":
+            # An await inside one branch is not "before" a sibling branch:
+            # each branch starts from the await state at the `if`, and the
+            # statement after the `if` sees the latest await of any branch.
+            entry_await = self.nearest_await
+            exit_await = entry_await
             for branch in node.children:
+                self.nearest_await = entry_await
                 if branch.data in ("if_branch", "elif_branch"):
                     self._check_condition(branch.children[0])
                     self._walk_expr(branch.children[0])
                     self._walk_statements(branch.children[1:])
                 else:
                     self._walk_statements(branch.children)
+                exit_await = _latest(exit_await, self.nearest_await)
+            self.nearest_await = exit_await
         elif kind == "while_stmt":
             self._enter_loop(node)
             self._check_condition(node.children[0])
@@ -765,9 +781,14 @@ class _FunctionChecker:
             self._walk_statements(node.children[offset + 1 :])
         elif kind == "match_stmt":
             self._walk_expr(node.children[0])
+            entry_await = self.nearest_await
+            exit_await = entry_await
             for branch in node.children[1:]:
                 if isinstance(branch, Tree):
+                    self.nearest_await = entry_await
                     self._walk_statements(branch.children[1:])
+                    exit_await = _latest(exit_await, self.nearest_await)
+            self.nearest_await = exit_await
         elif kind == "annotation":
             pass
         # pass/break/continue/breakpoint: nothing to do

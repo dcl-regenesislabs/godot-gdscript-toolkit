@@ -263,6 +263,14 @@ func f(cards: Array):
         card.show()
         await g()
 """,
+# an await in one branch is not before its sibling branch
+"""
+func f(card: Control, flag: bool):
+    if flag:
+        await g()
+    else:
+        card.show()
+""",
 # a lambda's own parameters are fresh
 """
 func f():
@@ -315,6 +323,18 @@ func f():
     row.show()
 """
     assert _names(code) == [(AWAIT_RULE, 11)]
+
+
+def test_await_in_any_branch_counts_after_the_if():
+    code = """
+func f(card: Control, flag: bool):
+    if flag:
+        await g()
+    else:
+        pass
+    card.show()
+"""
+    assert _names(code) == [(AWAIT_RULE, 7)]
 
 
 def test_loop_variable_after_await_in_body():

@@ -56,6 +56,46 @@ misc/MarkovianPCG.gd:96: Error: Function argument name "aOrigin" is not valid (f
 misc/MarkovianPCG.gd:96: Error: Function argument name "aPos" is not valid (function-argument-name)
 ```
 
+### Decentraland fork: object-lifetime checks
+
+This fork adds three checks for code that runs on Godot's **release** export
+templates, where a method call, `is`/`as` or `for` on a freed object is a
+SIGSEGV instead of the logged error the debug template gives you. `await` is
+where references go stale; the engine protects `self` (a coroutine whose
+instance was freed is never resumed) but nothing else.
+
+- `node-reference-across-await` — a method call on a member, parameter or
+  local that may hold a node, after the nearest preceding `await` (or anywhere
+  in a loop body that awaits, or inside a lambda), with no re-resolution
+  (assignment) or `is_instance_valid` / `NodeGuard.is_alive` in between. The
+  object whose coroutine or signal is awaited is alive on resume. `self`,
+  autoloads, engine singletons, `@onready` members and nodes the class parents
+  itself are exempt.
+- `node-argument-across-await` — same, for a node-typed name passed as an
+  argument after an await (the callee will dereference it).
+- `node-null-comparison` — `name == null` / `not name` / bare `if name:` on a
+  node-typed or scene-owned name: a freed instance is not null. Noisy on
+  lazily-created children; meant for audits and usually disabled in `.gdlintrc`.
+
+The fix the first two ask for is structural: make the async work a method of
+the node it needs, re-resolve the node from its owner after the await, or
+cancel the work when the owner frees the node. Validity checks are for
+lifetimes the code does not own.
+
+A name "may hold a node" when its declared type is not a built-in, an engine
+class that does not inherit `Node`, or matched by the `lifetime-safe-types`
+regex (put the project's own RefCounted / Resource / GDExtension classes
+there); an untyped name is tracked unless it matches `lifetime-safe-names`.
+`gdtoolkit/linter/tools/generate_safe_types.gd` prints both lists from a
+running engine.
+
+```yaml
+# .gdlintrc
+lifetime-safe-types: '^(PlaceholderManager|SocialItemData|Dcl\w+)$'
+disable:
+  - node-null-comparison
+```
+
 ## Formatting with gdformat [(more)](https://github.com/Scony/godot-gdscript-toolkit/wiki/4.-Formatter)
 
 **Formatting may lead to data loss, so it's highly recommended to use it along with Version Control System (VCS) e.g. `git`**

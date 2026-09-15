@@ -119,6 +119,9 @@ def _log_config_entries(config: MappingProxyType) -> None:
 
 
 def _update_config_with_missing_entries_inplace(config: dict) -> None:
+    # `disable:` with every entry commented out parses as None.
+    if config.get("disable") is None:
+        config["disable"] = []
     for key in DEFAULT_CONFIG:
         if key not in config:
             logging.info(

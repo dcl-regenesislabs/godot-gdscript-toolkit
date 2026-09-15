@@ -11,6 +11,7 @@ from . import (
     class_checks,
     design_checks,
     format_checks,
+    lifetime_checks,
     name_checks,
     misc_checks,
 )
@@ -95,6 +96,35 @@ DEFAULT_CONFIG = MappingProxyType(
         "excluded_directories": {".git"},
         "no-elif-return": None,
         "no-else-return": None,
+        # lifetime checks (see lifetime_checks.py)
+        "node-reference-across-await": None,
+        "node-argument-across-await": None,
+        "node-null-comparison": None,
+        # Declared types that can never hold a freed node, on top of the
+        # built-ins and engine non-Node classes the rule already knows: a
+        # regex matched against the declared type, for the project's own
+        # RefCounted / Resource classes and GDExtension classes, e.g.
+        # r"^(PlaceholderManager|SocialItemData|Dcl\\w+)$". Anything else
+        # (Node subclasses, Object, unknown project classes) is tracked.
+        "lifetime-safe-types": r"(?!)",
+        # Untyped names that are assumed to hold plain data rather than a node.
+        # Anything untyped and not matched is tracked - adding a type hint is
+        # the precise fix.
+        "lifetime-safe-names": (
+            r"^(i|j|k|n|idx|index|count|size|len|ok|err|error|res|result|response|data"
+            r"|json|dict|arr|array|list|items|value|key|text|str|string|name|id|url"
+            r"|path|flag|enabled|visible|callback|cb|callable|promise|profile|config"
+            r"|settings|options|args|params|payload|body|headers|request|req|resp"
+            r"|entry|wearable|emote|reason|message|msg|title|label_text"
+            r"|\w+_(id|ids|url|urls|path|paths|name|names|count|size|index|idx|time|ms"
+            r"|sec|seconds|type|kind|state|status|flag|enabled|hash|key|keys|value"
+            r"|values|text|str|string|color|pos|position|rect|vec|dir|data|json|dict"
+            r"|list|array|items|promise|result|response|error|err|msg|message|title"
+            r"|reason|profile|config|settings|options|args|params|payload|body|headers"
+            r"|request|req|resp|entry|entries|amount|price|total|number|num|ratio|rate"
+            r"|scale|factor|offset|delta|width|height|length|distance|angle|speed"
+            r"|duration|timeout|version|token|address|hash|urn|signature|nonce))$"
+        ),
         # never-returning-function # for non-void, typed functions
         # simplify-boolean-expression
         # consider-using-in
@@ -124,6 +154,7 @@ def lint_code(
     problems += class_checks.lint(parse_tree, config)
     problems += basic_checks.lint(parse_tree, config)
     problems += misc_checks.lint(parse_tree, config)
+    problems += lifetime_checks.lint(parse_tree, config)
 
     problems_to_lines_where_they_are_inactive = _fetch_problem_inactivity_lines(
         gdscript_code

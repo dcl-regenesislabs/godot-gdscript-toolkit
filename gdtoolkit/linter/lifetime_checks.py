@@ -167,6 +167,7 @@ def _collect_members(
     members = {}  # type: Dict[str, _TrackedName]
     own_children = _names_added_as_children(a_class)
     freed_members = _names_freed(a_class)
+    singletons = _names_assigned_engine_singletons(a_class)
     for statement in a_class.statements:
         if statement.kind not in ("class_var_stmt", "static_class_var_stmt"):
             continue
@@ -194,7 +195,9 @@ def _collect_members(
         node_like = scene_owned or _is_node_like(
             name, type_hint, safe_types, safe_names
         )
-        if type_hint is None and _is_safe_initializer(initializer, safe_types):
+        if name in singletons or (
+            type_hint is None and _is_safe_initializer(initializer, safe_types)
+        ):
             node_like = False
         typed_node = scene_owned or _is_typed_node(type_hint, safe_types)
         members[name] = _TrackedName(name, None, node_like, scene_owned, typed_node)
@@ -221,6 +224,21 @@ def _names_added_as_children(a_class: Class) -> Set[str]:
         added |= added_here
         freed_elsewhere |= freed_here - added_here
     return added - freed_elsewhere
+
+
+def _names_assigned_engine_singletons(a_class: Class) -> Set[str]:
+    """Members assigned `Engine.get_singleton(...)` anywhere in the class:
+    platform plugins that live for the whole process."""
+    names = set()  # type: Set[str]
+    for node in a_class.lark_node.find_data("assnmnt_expr"):
+        target = _single_name(node.children[0])
+        if target is None or len(node.children) != 3:
+            continue
+        value = node.children[2]
+        if isinstance(value, Tree) and value.data == "getattr_call":
+            if _attr_names(value.children[0]) == ["Engine", "get_singleton"]:
+                names.add(target)
+    return names
 
 
 def _names_freed(a_class: Class) -> Set[str]:

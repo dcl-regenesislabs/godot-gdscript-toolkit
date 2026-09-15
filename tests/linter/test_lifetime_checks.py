@@ -211,11 +211,15 @@ func f():
 # an engine singleton lives for the whole process
 """
 var plugin = Engine.get_singleton("DclIosPlugin")
+var _ios_plugin: Object = null
+func _ready():
+    _ios_plugin = Engine.get_singleton("DclGodotiOS")
 func f():
     var local_plugin = Engine.get_singleton("DclIosPlugin")
     await g()
     plugin.foo()
     local_plugin.foo()
+    _ios_plugin.foo()
 """,
 # a member the class builds itself and never frees
 """

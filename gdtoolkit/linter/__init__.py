@@ -98,6 +98,7 @@ DEFAULT_CONFIG = MappingProxyType(
         "no-else-return": None,
         # lifetime checks (see lifetime_checks.py)
         "node-reference-across-await": None,
+        "node-argument-across-await": None,
         "node-null-comparison": None,
         # Declared types that can never hold a freed node, on top of the
         # built-ins and engine non-Node classes the rule already knows: a

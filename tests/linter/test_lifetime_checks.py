@@ -217,6 +217,23 @@ func f():
     plugin.foo()
     local_plugin.foo()
 """,
+# a member the class builds itself and never frees
+"""
+var coordinator: SceneEntityCoordinator = SceneEntityCoordinator.new()
+func f():
+    await g()
+    coordinator.is_busy()
+""",
+# add_child.call_deferred parents too
+"""
+var player: AudioStreamPlayer
+func _ready():
+    player = AudioStreamPlayer.new()
+    get_tree().root.add_child.call_deferred(player)
+func f():
+    await g()
+    player.play()
+""",
 # declared types that cannot hold a node
 """
 var image: Image
@@ -301,6 +318,18 @@ func f():
     card.show()
 """
     assert _names(code) == [(AWAIT_RULE, 10)]
+
+
+def test_self_built_member_freed_by_the_class_is_not_exempt():
+    code = """
+var player: VideoStreamPlayer = VideoStreamPlayer.new()
+func _stop():
+    player.queue_free()
+func f():
+    await g()
+    player.play()
+"""
+    assert _names(code) == [(AWAIT_RULE, 7)]
 
 
 def test_non_node_script_gets_no_add_child_exemption():

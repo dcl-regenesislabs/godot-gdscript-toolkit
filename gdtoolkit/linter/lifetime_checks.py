@@ -160,11 +160,13 @@ def _compile_safe_types(pattern: str, ast: AbstractSyntaxTree) -> "re.Pattern":
     )
 
 
+# pylint: disable-next=too-many-locals
 def _collect_members(
     a_class: Class, safe_types: "re.Pattern", safe_names: "re.Pattern"
 ) -> Dict[str, _TrackedName]:
     members = {}  # type: Dict[str, _TrackedName]
     own_children = _names_added_as_children(a_class)
+    freed_members = _names_freed(a_class)
     for statement in a_class.statements:
         if statement.kind not in ("class_var_stmt", "static_class_var_stmt"):
             continue
@@ -175,7 +177,20 @@ def _collect_members(
         if name is None:
             continue
         onready = any(a.name == "onready" for a in statement.annotations)
-        scene_owned = onready or _is_node_lookup(initializer) or name in own_children
+        # A member the class builds in its declaration and never frees is
+        # owned by the instance: nothing else holds it, so it cannot be gone
+        # while `self` is alive (and a Node self never resumes after death).
+        self_built = (
+            _constructed_type(initializer) is not None
+            and name not in freed_members
+            and not _extends_non_node(a_class)
+        )
+        scene_owned = (
+            onready
+            or _is_node_lookup(initializer)
+            or name in own_children
+            or self_built
+        )
         node_like = scene_owned or _is_node_like(
             name, type_hint, safe_types, safe_names
         )
@@ -208,6 +223,14 @@ def _names_added_as_children(a_class: Class) -> Set[str]:
     return added - freed_elsewhere
 
 
+def _names_freed(a_class: Class) -> Set[str]:
+    """Names on which the class calls queue_free() / free() anywhere."""
+    freed = set()  # type: Set[str]
+    for function in a_class.lark_node.find_data("func_def"):
+        freed |= _children_added_and_freed(function)[1]
+    return freed
+
+
 def _children_added_and_freed(function: Tree) -> Tuple[Set[str], Set[str]]:
     added = set()  # type: Set[str]
     freed = set()  # type: Set[str]
@@ -216,12 +239,16 @@ def _children_added_and_freed(function: Tree) -> Tuple[Set[str], Set[str]]:
             callee = node.children[0]
             is_add_child = isinstance(callee, Token) and callee.value == "add_child"
         elif node.data == "getattr_call":
-            method = _last_attr(node.children[0])
+            attrs = _attr_names(node.children[0])
+            method = attrs[-1] if attrs else None
             if method in ("queue_free", "free"):
                 receiver, direct = _receiver_name(node.children[0])
                 if direct and receiver is not None:
                     freed.add(receiver)
-            is_add_child = method == "add_child"
+            is_add_child = method == "add_child" or attrs[-2:] == [
+                "add_child",
+                "call_deferred",
+            ]
         else:
             continue
         if is_add_child and len(node.children) > 1:
@@ -364,6 +391,14 @@ def _is_safe_initializer(expr: Optional[Tree], safe_types: "re.Pattern") -> bool
 
 def _is_safe_class_name(name: str, safe_types: "re.Pattern") -> bool:
     return name in ENGINE_SAFE_TYPES or safe_types.match(name) is not None
+
+
+def _attr_names(getattr_node: Tree) -> List[str]:
+    return [
+        c.value
+        for c in getattr_node.children
+        if isinstance(c, Token) and c.type in ("NAME", "GET", "SET")
+    ]
 
 
 def _last_attr(getattr_node: Tree) -> Optional[str]:

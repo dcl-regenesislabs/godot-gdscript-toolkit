@@ -1,5 +1,5 @@
 # Prints the class names that back ENGINE_SAFE_TYPES in
-# gdtoolkit/linter/lifetime_checks.py: every registered class that does not
+# gdtoolkit/linter/engine_safe_types.py: every registered class that does not
 # inherit Node, split into engine classes (the default list) and GDExtension
 # classes (a project's `lifetime-safe-types` config).
 #

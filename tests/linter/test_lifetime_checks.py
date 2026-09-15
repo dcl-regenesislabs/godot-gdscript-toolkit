@@ -373,6 +373,19 @@ func f():
     assert _names(code) == [(AWAIT_RULE, 11)]
 
 
+def test_branch_that_returns_does_not_leak_its_await():
+    code = """
+func f(card: Control, flag: bool):
+    if flag:
+        card.show()
+    else:
+        await g()
+        return
+    card.show()
+"""
+    assert _names(code) == []
+
+
 def test_await_in_any_branch_counts_after_the_if():
     code = """
 func f(card: Control, flag: bool):

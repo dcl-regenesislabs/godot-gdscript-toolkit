@@ -507,6 +507,19 @@ def _end_position(node) -> Position:
     return (node.end_line, node.end_column)
 
 
+def _terminates(statements) -> bool:
+    """True when the last statement of a block is return / break / continue."""
+    last = None
+    for statement in statements:
+        if isinstance(statement, Tree):
+            last = statement
+    return last is not None and last.data in (
+        "return_stmt",
+        "break_stmt",
+        "continue_stmt",
+    )
+
+
 def _latest(a: Optional[Position], b: Optional[Position]) -> Optional[Position]:
     if a is None:
         return b
@@ -633,7 +646,10 @@ class _FunctionChecker:
                     self._walk_statements(branch.children[1:])
                 else:
                     self._walk_statements(branch.children)
-                exit_await = _latest(exit_await, self.nearest_await)
+                # A branch that ends in return/break/continue never reaches
+                # the statement after the `if`, so its awaits do not either.
+                if not _terminates(branch.children):
+                    exit_await = _latest(exit_await, self.nearest_await)
             self.nearest_await = exit_await
         elif kind == "while_stmt":
             self._enter_loop(node)
@@ -668,7 +684,8 @@ class _FunctionChecker:
                 if isinstance(branch, Tree):
                     self.nearest_await = entry_await
                     self._walk_statements(branch.children[1:])
-                    exit_await = _latest(exit_await, self.nearest_await)
+                    if not _terminates(branch.children):
+                        exit_await = _latest(exit_await, self.nearest_await)
             self.nearest_await = exit_await
         elif kind == "annotation":
             pass

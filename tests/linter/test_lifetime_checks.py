@@ -193,6 +193,30 @@ func f():
     await g()
     _timer.start()
 """,
+# a local the instance parents itself, through any parent in its tree
+"""
+func f():
+    var http := HTTPRequest.new()
+    add_child(http)
+    await http.request_completed
+    http.queue_free()
+""",
+"""
+func f():
+    var card := Control.new()
+    %Container.add_child(card)
+    await g()
+    card.show()
+""",
+# an engine singleton lives for the whole process
+"""
+var plugin = Engine.get_singleton("DclIosPlugin")
+func f():
+    var local_plugin = Engine.get_singleton("DclIosPlugin")
+    await g()
+    plugin.foo()
+    local_plugin.foo()
+""",
 # declared types that cannot hold a node
 """
 var image: Image
@@ -247,6 +271,34 @@ func f():
 ])
 def test_unguarded_access_after_await_ok(code):
     assert _names(code) == []
+
+
+def test_child_the_class_frees_itself_is_not_exempt():
+    # A list that rebuilds its rows frees them independently of self.
+    code = """
+var card: Control
+func _rebuild():
+    card = Control.new()
+    add_child(card)
+func _clear():
+    card.queue_free()
+func f():
+    await g()
+    card.show()
+"""
+    assert _names(code) == [(AWAIT_RULE, 10)]
+
+
+def test_non_node_script_gets_no_add_child_exemption():
+    code = """
+extends RefCounted
+func f(root: Node):
+    var preview := Control.new()
+    root.add_child(preview)
+    await g()
+    preview.show()
+"""
+    assert _names(code) == [(AWAIT_RULE, 7)]
 
 
 def test_loop_variable_after_await_in_body():

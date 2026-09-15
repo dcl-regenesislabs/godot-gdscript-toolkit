@@ -382,10 +382,12 @@ def lint(parse_tree: Tree, config: MappingProxyType) -> List[Problem]:
             for s in a_class.statements
             if s.kind == "static_func_def"
         ]
+        own_children = _names_added_as_children(a_class)
         for function in functions:
             checker = _FunctionChecker(
                 function,
                 members,
+                own_children,
                 safe_types,
                 safe_names,
                 (run_await, run_arg, run_null),
@@ -401,7 +403,7 @@ def _collect_members(
     a_class: Class, safe_types: "re.Pattern", safe_names: "re.Pattern"
 ) -> Dict[str, _TrackedName]:
     members = {}  # type: Dict[str, _TrackedName]
-    own_children = _members_added_as_children(a_class)
+    own_children = _names_added_as_children(a_class)
     for statement in a_class.statements:
         if statement.kind not in ("class_var_stmt", "static_class_var_stmt"):
             continue
@@ -416,28 +418,74 @@ def _collect_members(
         node_like = scene_owned or _is_node_like(
             name, type_hint, safe_types, safe_names
         )
+        if type_hint is None and _is_safe_initializer(initializer, safe_types):
+            node_like = False
         typed_node = scene_owned or _is_typed_node(type_hint, safe_types)
         members[name] = _TrackedName(name, None, node_like, scene_owned, typed_node)
     return members
 
 
-def _members_added_as_children(a_class: Class) -> Set[str]:
-    """Names passed to a bare `add_child(name)` anywhere in the class: a node
-    the instance parents itself is freed with it, like an @onready one."""
-    names = set()  # type: Set[str]
-    for node in a_class.lark_node.iter_subtrees():
-        if node.data != "standalone_call":
+def _names_added_as_children(a_class: Class) -> Set[str]:
+    """Names passed to `add_child(name)` / `x.add_child(name)` anywhere in the
+    class. When the class is itself a node, a node it parents (directly or
+    under one of its children) is freed with it, like an @onready one; the
+    engine never resumes a coroutine whose `self` is gone, so such a name
+    cannot dangle across an await. Scripts extending a non-Node base
+    (RefCounted, Resource) get no such exemption, and neither does a name the
+    class frees from a function other than the one that parented it (a list
+    that rebuilds its rows gives them a shorter lifetime than `self`); the
+    create / add_child / await / queue_free shape inside one function is fine.
+    """
+    if _extends_non_node(a_class):
+        return set()
+    added = set()  # type: Set[str]
+    freed_elsewhere = set()  # type: Set[str]
+    for function in a_class.lark_node.find_data("func_def"):
+        added_here, freed_here = _children_added_and_freed(function)
+        added |= added_here
+        freed_elsewhere |= freed_here - added_here
+    return added - freed_elsewhere
+
+
+def _children_added_and_freed(function: Tree) -> Tuple[Set[str], Set[str]]:
+    added = set()  # type: Set[str]
+    freed = set()  # type: Set[str]
+    for node in function.iter_subtrees():
+        if node.data == "standalone_call":
+            callee = node.children[0]
+            is_add_child = isinstance(callee, Token) and callee.value == "add_child"
+        elif node.data == "getattr_call":
+            method = _last_attr(node.children[0])
+            if method in ("queue_free", "free"):
+                receiver, direct = _receiver_name(node.children[0])
+                if direct and receiver is not None:
+                    freed.add(receiver)
+            is_add_child = method == "add_child"
+        else:
             continue
-        callee = node.children[0]
-        if (
-            isinstance(callee, Token)
-            and callee.value == "add_child"
-            and len(node.children) > 1
-        ):
+        if is_add_child and len(node.children) > 1:
             child = _single_name(node.children[1])
             if child is not None:
-                names.add(child)
-    return names
+                added.add(child)
+    return added, freed
+
+
+def _extends_non_node(a_class: Class) -> bool:
+    """True when the class's `extends` names a built-in / engine class that
+    is not a Node. Unknown (project) bases are assumed to be nodes."""
+    for statement in a_class.statements:
+        if statement.kind not in ("extends_stmt", "classname_extends_stmt"):
+            continue
+        tokens = [
+            c.value
+            for c in statement.lark_node.children
+            if isinstance(c, Token) and c.type == "NAME"
+        ]
+        if statement.kind == "classname_extends_stmt":
+            tokens = tokens[1:]
+        if tokens and tokens[0] in ENGINE_SAFE_TYPES:
+            return True
+    return False
 
 
 def _split_var_node(var_node: Tree):
@@ -536,13 +584,20 @@ def _is_safe_initializer(expr: Optional[Tree], safe_types: "re.Pattern") -> bool
     if value.data == "getattr_call":
         getattr_node = value.children[0]
         parts = [
-            c
+            c.value
             for c in getattr_node.children
             if isinstance(c, Token) and c.type == "NAME"
         ]
-        if len(parts) == 2 and parts[1].value == "new":
-            return safe_types.match(parts[0].value) is not None
+        # Engine singletons (platform plugins) live for the whole process.
+        if parts == ["Engine", "get_singleton"]:
+            return True
+        if len(parts) == 2 and parts[1] == "new":
+            return _is_safe_class_name(parts[0], safe_types)
     return False
+
+
+def _is_safe_class_name(name: str, safe_types: "re.Pattern") -> bool:
+    return name in ENGINE_SAFE_TYPES or safe_types.match(name) is not None
 
 
 def _last_attr(getattr_node: Tree) -> Optional[str]:
@@ -623,11 +678,13 @@ class _FunctionChecker:
         self,
         function: Function,
         members: Dict[str, _TrackedName],
+        own_children: Set[str],
         safe_types: "re.Pattern",
         safe_names: "re.Pattern",
         enabled: Tuple[bool, bool, bool],
     ):
         self.function = function
+        self.own_children = own_children
         self.safe_types = safe_types
         self.safe_names = safe_names
         self.run_await, self.run_arg, self.run_null = enabled
@@ -669,8 +726,9 @@ class _FunctionChecker:
                 continue
             node_like = _is_node_like(name, type_hint, self.safe_types, self.safe_names)
             typed_node = _is_typed_node(type_hint, self.safe_types)
+            scene_owned = name in self.own_children
             scope.declare(
-                _TrackedName(name, _position(node), node_like, False, typed_node)
+                _TrackedName(name, _position(node), node_like, scene_owned, typed_node)
             )
 
     def _declare_local(self, var_node: Tree) -> None:
@@ -683,7 +741,10 @@ class _FunctionChecker:
         if type_hint is None and _is_safe_initializer(initializer, self.safe_types):
             node_like = False
         typed_node = _is_typed_node(type_hint, self.safe_types)
-        tracked = _TrackedName(name, _position(var_node), node_like, False, typed_node)
+        scene_owned = name in self.own_children
+        tracked = _TrackedName(
+            name, _position(var_node), node_like, scene_owned, typed_node
+        )
         # A declaration is an assignment: fresh until the next await. Dated at
         # the end of the statement so `var x = await f()` counts as after it.
         tracked.cleared_at = _end_position(var_node)

@@ -669,8 +669,18 @@ class _FunctionChecker:
             what = "call a method on" if direct else "call a method through"
             self._check_use(receiver, node, what)
         self._check_arguments(node.children[1:], node)
+        # `emitter.signal.connect(func(): emitter.x())`: the emitter is alive
+        # while its own signal is being delivered.
+        emitter = receiver if names[-1] == "connect" and not direct else None
         for child in node.children:
-            self._walk_expr(child)
+            if (
+                emitter is not None
+                and isinstance(child, Tree)
+                and child.data == "lambda"
+            ):
+                self._walk_lambda(child, alive=emitter)
+            else:
+                self._walk_expr(child)
 
     def _walk_type_test(self, node: Tree) -> None:
         left = _single_name(node.children[0])
@@ -694,17 +704,34 @@ class _FunctionChecker:
         else:
             self._walk_expr(target)
 
-    def _walk_lambda(self, node: Tree) -> None:
+    def _walk_lambda(self, node: Tree, alive: Optional[str] = None) -> None:
         # A lambda runs later by construction: everything it captures is
-        # "after an await". Its own parameters and locals are fresh.
+        # "after an await". Its own parameters and locals are fresh, and so
+        # is `alive` (the object whose signal delivers the lambda).
         saved_scope = self.scope
         saved_await = self.nearest_await
         self.scope = _Scope(parent=saved_scope)
         self._declare_parameters(node.children[0], self.scope)
         self.nearest_await = _position(node)
+        if alive is not None:
+            tracked = saved_scope.lookup(alive)
+            if tracked is not None:
+                self._shadow_as_alive(tracked)
         self._walk_statements(node.children[1:])
         self.scope = saved_scope
         self.nearest_await = saved_await
+
+    def _shadow_as_alive(self, tracked: _TrackedName) -> None:
+        line, column = self.nearest_await or (0, 0)
+        fresh = _TrackedName(
+            tracked.name,
+            tracked.declared_at,
+            tracked.node_like,
+            tracked.scene_owned,
+            tracked.typed_node,
+        )
+        fresh.cleared_at = (line, column + 1)
+        self.scope.declare(fresh)
 
     # -- bookkeeping
 

@@ -95,10 +95,10 @@ func f():
     await g()
     manager.instance.show()
 """,
-# lambda capturing a parameter
+# lambda capturing a parameter that is not the emitter
 """
-func f(card: Control):
-    card.pressed.connect(func(): card.hide())
+func f(card: Control, button: Button):
+    button.pressed.connect(func(): card.hide())
 """,
 # static functions are checked too
 """
@@ -270,6 +270,12 @@ func f(card: Control, flag: bool):
         await g()
     else:
         card.show()
+""",
+# the emitter of the signal a lambda is connected to is alive inside it
+"""
+func f():
+    var http := HTTPRequest.new()
+    http.request_completed.connect(func(): http.queue_free())
 """,
 # a lambda's own parameters are fresh
 """
